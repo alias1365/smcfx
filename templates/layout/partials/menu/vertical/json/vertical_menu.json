@@ -14,9 +14,9 @@
       "slug": "Student Manager",
       "submenu": [
         {
-          "url": "admin_dashboard",
+          "url": "admin_student_manage",
           "name": "Student List",
-          "slug": "admin_dashboard"
+          "slug": "admin_student_manage"
         },
         {
           "url": "admin_dashboard",

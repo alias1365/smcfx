@@ -10,7 +10,7 @@ from django.db.models import Q
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 
-from smcfx_admin.forms import StudentCreateForm, StudentEditForm
+from smcfx_admin.forms.studentForms import StudentCreateForm, StudentEditForm
 from smcfx_common.viewParent import smcfxListView, smcfxCreateView, smcfxUpdateView, smcfxDeleteView
 
 User = get_user_model()
