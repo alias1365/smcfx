@@ -1,0 +1,34 @@
+{
+  "menu": [
+    {
+      "name": "Dashboard",
+      "icon": "menu-icon tf-icons ti ti-dashboard",
+      "slug": "definition",
+      "url": "admin_dashboard"
+
+
+    },
+    {
+      "name": "Student Manager",
+      "icon": "menu-icon tf-icons ti ti-book-open-reader",
+      "slug": "Student Manager",
+      "submenu": [
+        {
+          "url": "admin_dashboard",
+          "name": "Student List",
+          "slug": "admin_dashboard"
+        },
+        {
+          "url": "admin_dashboard",
+          "name": "Chatbot Dialogs",
+          "slug": "admin_dashboard"
+        },
+        {
+          "url": "admin_dashboard",
+          "name": "Chatbot Leads",
+          "slug": "admin_dashboard"
+        }
+      ]
+    }
+  ]
+}

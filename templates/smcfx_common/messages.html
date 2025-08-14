@@ -1,0 +1,34 @@
+<div class="content-wrapper">
+    <div class="container-xxl flex-grow-1 ">
+        <div class="row">
+            <div class="col-md-12">
+                {% for message in messages %}
+                    {% if message.tags|lower == "success" %}
+                        <footer class="footer bg-success mb-6">
+                            <div class="container-fluid d-flex flex-md-row flex-column justify-content-between align-items-md-center gap-1 container-p-x py-4">
+                                <div>
+                                    <a href="javascript:void(0);"
+                                       class="footer-text fw-medium">
+                                        {{ message }}
+                                    </a>
+                                </div>
+                            </div>
+                        </footer>
+                    {% endif %}
+                    {% if message.tags|lower == "error" %}
+                        <footer class="footer bg-danger mb-6">
+                            <div class="container-fluid d-flex flex-md-row flex-column justify-content-between align-items-md-center gap-1 container-p-x py-4">
+                                <div>
+                                    <a href="javascript:void(0);"
+                                       class="footer-text fw-medium">
+                                        {{ message }}
+                                    </a>
+                                </div>
+                            </div>
+                        </footer>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,62 @@
+{% load formTags widget_tweaks %}
+
+{% if form.non_field_errors %}
+    <div class="alert alert-danger" role="alert">
+        {% for error in form.non_field_errors %}
+            <p>{% if forloop.last %} class="mb-0"{% endif %}>{{ error }}</p>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<style>
+    .ul_inline_form {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .ul_inline_form li {
+        margin-bottom: 0.5rem;
+        float: left;
+    }
+
+    .ul_inline_form .small-box {
+        width: 24%;
+        margin-left: 1%;
+    }
+
+    .ul_inline_form .middle-box {
+        width: 49%;
+        margin-left: 1%;
+    }
+
+    .ul_inline_form .big-box {
+        width: 100%;
+    }
+</style>
+
+<ul class="ul_inline_form">
+    {% for field in form %}
+        {% if field|field_type != 'imagefield' %}
+            <li class="{{ field|li_class }}">
+                {{ field.label_tag }}
+                {% if disabled == "true" %}
+                    {% render_field field class=field|input_class disabled=True placeholder=field.label %}
+                {% else %}
+                    {% render_field field class=field|input_class placeholder=field.label %}
+                {% endif %}
+                {% for error in field.errors %}
+                    <div class="invalid-feedback">
+                        {{ error|trans_error }}
+                    </div>
+                {% endfor %}
+                {% if field.help_text %}
+                    <small class="form-text text-muted">
+                        {{ field.help_text|safe }}
+                    </small>
+                {% endif %}
+            </li>
+        {% endif %}
+    {% endfor %}
+</ul>
+

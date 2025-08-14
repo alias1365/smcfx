@@ -1,0 +1,21 @@
+
+echo ".idea/
+__pycache__/
+*.pyc
+.env
+.env.*
+*.sqlite3
+/staticfiles/
+/media/
+*.log
+.vscode/
+*.pid
+celerybeat-schedule
+coverage.xml
+htmlcov/
+.mypy_cache/
+.pytest_cache/
+.DS_Store
+" > .gitignore
+
+
