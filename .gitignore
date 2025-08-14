@@ -1,26 +1,48 @@
-
+# IDEs
 .idea/
 .vscode/
+
+# Python cache
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
+*.pkl
+
+# Virtual environments
+.venv/
+env/
+venv/
+ENV/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Logs
 *.log
+
+# Env files / secrets
 .env
 .env.*
+
+# SQLite databases
 *.sqlite3
-/media/
+
+# Django static/media (collected or uploaded)
 staticfiles/
 static_root/
+media/
+
+# Coverage / test
+.coverage*
+htmlcov/
 .mypy_cache/
 .pytest_cache/
-htmlcov/
-.coverage*
-celerybeat-schedule
+.tox/
+
+# PID files
 *.pid
-.DS_Store
+
 # Docker artifacts
 *.tar
-EOF
-
-
-.venv/
