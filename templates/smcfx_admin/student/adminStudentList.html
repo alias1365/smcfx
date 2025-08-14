@@ -2,7 +2,7 @@
 {% load static %}
 {% load i18n %}
 
-{% block title %}AiDataLizer - Services{% endblock %}
+{% block title %}Admin-Dashboard{% endblock %}
 
 {% block vendor_css %}
     {{ block.super }}
@@ -23,7 +23,7 @@
 {% block content %}
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="card-title mb-0">Services</h5>
+            <h5 class="card-title mb-0">Students</h5>
             <button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#offcanvasAddService">
                 + Add Service
             </button>
@@ -62,12 +62,12 @@
                                         <i class="ti ti-photo me-2"></i>Images
                                     </a></li>
 
-                                    <a href="{% url 'service_hints' srv.id %}"
+                                    <a href="#"
                                        class="dropdown-item">
                                         <i class="ti ti-tree"></i> View Hints Tree
                                     </a>
                                     <li>
-                                        <form method="POST" action="{% url 'delete_service' srv.id %}"
+                                        <form method="POST" action=""
                                               onsubmit="return confirm('Delete this service?')">
                                             {% csrf_token %}
                                             <button class="dropdown-item text-danger" type="submit"><i
@@ -84,7 +84,7 @@
 
             </table>
         </div>
-        {% include 'aid_admin/../aid_common/paginator.html' %}
+        {% include 'smcfx_common/paginator.html' %}
         <!-- Offcanvas -->
         <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasAddService">
             <div class="offcanvas-header">
