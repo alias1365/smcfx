@@ -1,21 +1,26 @@
 
-echo ".idea/
+.idea/
+.vscode/
 __pycache__/
 *.pyc
+*.pyo
+*.log
 .env
 .env.*
 *.sqlite3
-/staticfiles/
 /media/
-*.log
-.vscode/
-*.pid
-celerybeat-schedule
-coverage.xml
-htmlcov/
+staticfiles/
+static_root/
 .mypy_cache/
 .pytest_cache/
+htmlcov/
+.coverage*
+celerybeat-schedule
+*.pid
 .DS_Store
-" > .gitignore
+# Docker artifacts
+*.tar
+EOF
 
 
+.venv/
