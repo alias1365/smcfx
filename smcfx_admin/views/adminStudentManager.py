@@ -26,7 +26,7 @@ class StaffOnlyMixin(LoginRequiredMixin, UserPassesTestMixin):
         return redirect("login")
 
 class ManageStudentListView(StaffOnlyMixin, smcfxListView):
-    template_name = "admin/manage_student.html"
+    template_name = "smcfx_admin/student/adminStudentList.html"
     context_object_name = "users"
     paginate_by = 20
 
@@ -48,7 +48,7 @@ class ManageStudentListView(StaffOnlyMixin, smcfxListView):
         return ctx
 
 class StudentCreateView(StaffOnlyMixin, smcfxCreateView):
-    template_name = "admin/student_form.html"
+    template_name = "smcfx_admin/student/adminStudentForm.html"
     form_class = StudentCreateForm
     success_url = reverse_lazy("manage_student")
 
@@ -87,7 +87,7 @@ class StudentCreateView(StaffOnlyMixin, smcfxCreateView):
         return ctx
 
 class StudentUpdateView(StaffOnlyMixin, smcfxUpdateView):
-    template_name = "admin/student_form.html"
+    template_name = "smcfx_admin/student/adminStudentForm.html"
     form_class = StudentEditForm
     success_url = reverse_lazy("manage_student")
 
