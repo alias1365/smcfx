@@ -166,9 +166,22 @@ class file_receive_log(models.Model):
         return self.log
 
 
-# JRN models
+# student models
+class student(models.Model):
+    user = models.OneToOneField(User, related_name="student_user_ref", on_delete=models.CASCADE)
+    mobile = models.CharField(max_length=25)
+    country = models.CharField(max_length=100, null=True, blank=True)
+    state = models.CharField(max_length=100, null=True, blank=True)
+    city = models.CharField(max_length=100, null=True, blank=True)
+    postal_code = models.CharField(max_length=100, null=True, blank=True)
+    timezone = models.CharField(max_length=100, null=True, blank=True)
+    init_pass = models.CharField(max_length=30)
+
+    def __str__(self):
+        return f"{self.user} - {self.mobile}"
 
 
+# settings models
 class expert_setting_risk(models.Model):
     user = models.OneToOneField(User, related_name="user_risk_setting_ref", on_delete=models.CASCADE)
     risk_type = models.SmallIntegerField(default=1)

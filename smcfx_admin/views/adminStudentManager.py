@@ -9,6 +9,7 @@ from django.contrib.auth.models import Group
 from django.db.models import Q
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
+from django.http import JsonResponse
 
 from smcfx_admin.forms.studentForms import StudentCreateForm, StudentEditForm
 from smcfx_common.viewParent import smcfxListView, smcfxCreateView, smcfxUpdateView, smcfxDeleteView
@@ -52,20 +53,23 @@ class StudentCreateView(StaffOnlyMixin, smcfxCreateView):
     form_class = StudentCreateForm
     success_url = reverse_lazy("manage_student")
 
+    # کمک‌متد برای تشخیص درخواست AJAX
+    def _is_ajax(self):
+        return self.request.headers.get("x-requested-with") == "XMLHttpRequest"
+
     def form_valid(self, form):
         email = form.cleaned_data["email"].lower()
         first_name = form.cleaned_data.get("first_name", "")
         last_name = form.cleaned_data.get("last_name", "")
         is_active = form.cleaned_data.get("is_active", True)
 
-        # جلوگیری از ایمیل تکراری بدون دست‌زدن به مدل کاربر
         if User.objects.filter(email__iexact=email).exists():
             form.add_error("email", "این ایمیل قبلاً ثبت شده است.")
             return self.form_invalid(form)
 
         password = _gen_password()
         user = User.objects.create(
-            username=email,      # سیاست: یوزرنیم = ایمیل
+            username=email,
             email=email,
             first_name=first_name,
             last_name=last_name,
@@ -77,9 +81,20 @@ class StudentCreateView(StaffOnlyMixin, smcfxCreateView):
         student_group, _ = Group.objects.get_or_create(name="student")
         user.groups.add(student_group)
 
-        # نمایش یکباره پسورد
+        # پیام موفقیت؛ در AJAX هم در session ذخیره می‌شود و بعد از reload نمایش داده می‌شود
         messages.success(self.request, f"دانشجو ایجاد شد. پسورد اولیه: {password}")
+
+        if self._is_ajax():
+            return JsonResponse({"success": True}, status=200)
+
         return super().form_valid(form)
+
+    def form_invalid(self, form):
+        if self._is_ajax():
+            # تبدیل خطاها به ساختار JSON قابل‌خواندن
+            errors = {k: [str(e) for e in v] for k, v in form.errors.items()}
+            return JsonResponse({"success": False, "errors": errors}, status=400)
+        return super().form_invalid(form)
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)

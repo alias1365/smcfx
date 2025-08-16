@@ -1,8 +1,7 @@
 {% extends layout_path %}
-{% load static %}
-{% load i18n %}
+{% load static i18n %}
 
-{% block title %}Manage Student{% endblock %}
+{% block title %}Students - List{% endblock %}
 
 {% block vendor_css %}
     {{ block.super }}
@@ -12,122 +11,176 @@
 
 {% block vendor_js %}
     {{ block.super }}
+    {# مهم: bundle لازم است تا Offcanvas کار کند #}
+    <script src="{% static 'vendor/js/bootstrap.js' %}"></script>
     <script src="{% static 'vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
     <script src="{% static 'vendor/libs/select2/select2.js' %}"></script>
 {% endblock %}
 
+{# اگر AJAX می‌خواهی، این بلاک را نگه دار؛ وگرنه حذفش کن تا فرم submit معمولی شود #}
 {% block page_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // اگر می‌خواهی با fetch ارسال شود، ویو باید JSON برگرداند (نمونه‌اش پایین آوردم)
+            const form = document.getElementById('addStudentForm');
+            if (!form) return;
+
+            // CSRF از کوکی
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+            }
+
+            const csrftoken = getCookie('csrftoken');
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const formData = new FormData(form);
+                fetch("{% url 'admin_student_create' %}", {
+                    method: "POST",
+                    headers: {'X-CSRFToken': csrftoken, 'X-Requested-With': 'XMLHttpRequest'},
+                    body: formData
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            const box = document.getElementById('addStudentErrors');
+                            box.innerHTML = '';
+                            (data.errors ? Object.entries(data.errors) : [["error", "Failed"]]).forEach(([k, v]) => {
+                                const li = document.createElement('li');
+                                li.textContent = `${k}: ${Array.isArray(v) ? v.join(', ') : v}`;
+                                box.appendChild(li);
+                            });
+                            document.getElementById('addStudentAlert').classList.remove('d-none');
+                        }
+                    })
+                    .catch(err => {
+                        alert(err);
+                    });
+            });
+        });
+    </script>
 {% endblock %}
 
 {% block content %}
-    <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Card Header -->
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0">Students</h5>
-                <div class="d-flex gap-2">
-                    <a href="{% url 'admin_student_create' %}" class="btn btn-primary">
-                        <i class="ti ti-user-plus me-1"></i> Add Student
-                    </a>
-                </div>
-            </div>
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Students</h5>
+            <button type="button"
+                    class="btn btn-primary"
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#offcanvasAddStudent"
+                    aria-controls="offcanvasAddStudent">
+                + Add Student
+            </button>
+        </div>
 
-            <!-- Search -->
-            <div class="card-body border-top pt-3">
-                <form method="get" class="row g-2 align-items-center">
-                    <div class="col-sm-6 col-md-4">
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="ti ti-search"></i></span>
-                            <input type="text" name="q" value="{{ q }}" class="form-control"
-                                   placeholder="Search by email, name...">
+        <div class="card-datatable table-responsive">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th style="width:80px;">ID</th>
+                    <th>Email</th>
+                    <th>Name</th>
+                    <th style="width:120px;">Active</th>
+                    <th class="text-center" style="width:160px;">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for u in users %}
+                    <tr>
+                        <td>#{{ u.id }}</td>
+                        <td class="fw-semibold">{{ u.email }}</td>
+                        <td>{{ u.first_name }} {{ u.last_name }}</td>
+                        <td>
+                            {% if u.is_active %}
+                                <span class="badge bg-label-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-label-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="dropdown">
+                                <button class="btn p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="ti ti-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'student_edit' u.id %}">
+                                            <i class="ti ti-edit me-2"></i>Edit
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <form method="post" action="{% url 'student_delete' u.id %}"
+                                              onsubmit="return confirm('Delete this student?')">
+                                            {% csrf_token %}
+                                            <button class="dropdown-item text-danger" type="submit">
+                                                <i class="ti ti-trash me-2"></i>Delete
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">No students found.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% include 'smcfx_common/paginator.html' %}
+
+        <!-- Offcanvas: Add Student -->
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasAddStudent"
+             aria-labelledby="offcanvasAddStudentLabel">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title" id="offcanvasAddStudentLabel">Add New Student</h5>
+                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+            </div>
+            <div class="offcanvas-body">
+                <div id="addStudentAlert" class="alert alert-danger d-none">
+                    <ul id="addStudentErrors" class="mb-0"></ul>
+                </div>
+
+                {# گزینه ۱: AJAX (page_js) / گزینه ۲: POST معمولی (action را فعال کن) #}
+                <form id="addStudentForm"
+                      method="post" {% comment %} action="{% url 'student_create' %}" {% endcomment %}>
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="id_email" class="form-label">Email*</label>
+                        <input type="email" name="email" id="id_email" class="form-control"
+                               placeholder="student@example.com" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_first_name" class="form-label">First name</label>
+                            <input type="text" name="first_name" id="id_first_name" class="form-control">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_last_name" class="form-label">Last name</label>
+                            <input type="text" name="last_name" id="id_last_name" class="form-control">
                         </div>
                     </div>
-                    <div class="col-auto">
-                        <button class="btn btn-outline-secondary" type="submit">Search</button>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" value="on" id="id_is_active" name="is_active"
+                               checked>
+                        <label class="form-check-label" for="id_is_active">Active</label>
                     </div>
+                    <button type="submit" class="btn btn-primary">Add</button>
                 </form>
 
-                {% if messages %}
-                    <div class="mt-3">
-                        {% for m in messages %}
-                            <div class="alert alert-{{ m.tags }} mb-1">{{ m }}</div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </div>
-
-            <!-- Table -->
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                    <tr>
-                        <th style="width: 80px;">ID</th>
-                        <th>Email</th>
-                        <th>Name</th>
-                        <th style="width: 120px;">Active</th>
-                        <th style="width: 160px;">Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for u in users %}
-                        <tr>
-                            <td>#{{ u.id }}</td>
-                            <td class="fw-semibold">{{ u.email }}</td>
-                            <td>{{ u.first_name }} {{ u.last_name }}</td>
-                            <td>
-                                {% if u.is_active %}
-                                    <span class="badge bg-label-success">Active</span>
-                                {% else %}
-                                    <span class="badge bg-label-secondary">Inactive</span>
-                                {% endif %}
-                            </td>
-                            <td class="text-nowrap">
-                                <a href="{% url 'admin_student_edit' u.id %}" class="btn btn-sm btn-outline-primary">
-                                    <i class="ti ti-edit me-1"></i>Edit
-                                </a>
-                                <a href="{% url 'admin_student_delete' u.id %}#delete" class="btn btn-sm btn-outline-danger">
-                                    <i class="ti ti-trash me-1"></i>Delete
-                                </a>
-                            </td>
-                        </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="5" class="text-center py-4 text-muted">No students found.</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination -->
-            {% if is_paginated %}
-                <div class="card-footer d-flex justify-content-between align-items-center">
-                    <div class="text-muted small">
-                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-                    </div>
-                    <ul class="pagination mb-0">
-                        {% if page_obj.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link" href="?q={{ q }}&page={{ page_obj.previous_page_number }}"><i
-                                        class="ti ti-chevron-left"></i></a>
-                            </li>
-                        {% else %}
-                            <li class="page-item disabled"><span class="page-link"><i
-                                    class="ti ti-chevron-left"></i></span></li>
-                        {% endif %}
-
-                        {% if page_obj.has_next %}
-                            <li class="page-item">
-                                <a class="page-link" href="?q={{ q }}&page={{ page_obj.next_page_number }}"><i
-                                        class="ti ti-chevron-right"></i></a>
-                            </li>
-                        {% else %}
-                            <li class="page-item disabled"><span class="page-link"><i
-                                    class="ti ti-chevron-right"></i></span></li>
-                        {% endif %}
-                    </ul>
+                <div class="text-muted small mt-2">
+                    * Email also becomes the username. A random password will be generated and shown to admin as a
+                    message.
                 </div>
-            {% endif %}
+            </div>
         </div>
     </div>
 {% endblock %}
